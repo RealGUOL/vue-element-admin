@@ -35,6 +35,18 @@ const tableRouter = {
       component: () => import('@/views/table/complex-table'),
       name: 'ComplexTable',
       meta: { title: 'Complex Table' }
+    },
+    {
+      path: 'crew-table',
+      component: () => import('@/views/table/complex-table'),
+      name: 'CrewTable',
+      meta: { title: '剧组' }
+    },
+    {
+      path: 'prop-table',
+      component: () => import('@/views/table/complex-table'),
+      name: 'PropTable',
+      meta: { title: '道具' }
     }
   ]
 }
