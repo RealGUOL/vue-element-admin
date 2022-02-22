@@ -1,4 +1,5 @@
 'use strict'
+const { trace } = require('console')
 const path = require('path')
 const defaultSettings = require('./src/settings.js')
 
@@ -36,7 +37,18 @@ module.exports = {
       warnings: false,
       errors: true
     },
-    before: require('./mock/mock-server.js')
+    // 取消mock
+    // before: require('./mock/mock-server.js')
+    // 配置devServer代理转发请求，防止跨域问题
+    proxy: {
+      [process.env.VUE_APP_BASE_API]: {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        pathRewrite: {
+          ['^' + process.env.VUE_APP_BASE_API + '/vue-element-admin']: ''
+        }
+      }
+    }
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
