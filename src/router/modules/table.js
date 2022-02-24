@@ -44,7 +44,7 @@ const tableRouter = {
     },
     {
       path: 'prop-table',
-      component: () => import('@/views/table/complex-table'),
+      component: () => import('@/views/table/prop-complex-table'),
       name: 'PropTable',
       meta: { title: '道具' }
     }
