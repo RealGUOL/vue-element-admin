@@ -38,7 +38,7 @@ const tableRouter = {
     },
     {
       path: 'crew-table',
-      component: () => import('@/views/table/complex-table'),
+      component: () => import('@/views/table/crew-complex-table'),
       name: 'CrewTable',
       meta: { title: '剧组' }
     },

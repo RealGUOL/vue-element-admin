@@ -35,34 +35,24 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Prop ID" width="150px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.propId }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="Prop Code" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.propCode }}</span>
+          <span>{{ row.crewId }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Prop Name" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.propName }}</span>
+          <span>{{ row.crewName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Price" width="150px" align="center">
+      <el-table-column label="Contact" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.price }}</span>
+          <span>{{ row.contact }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Prop Stock" width="150px" align="center">
+      <el-table-column label="Phone" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.stock }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Image" width="150px" align="center">
-        <template slot-scope="{row}">
-          <span>{{ row.img }}</span>
+          <span>{{ row.phone }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Remark" width="150px" align="center">
@@ -132,7 +122,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createProp, updateProp } from '@/api/prop'
+import { fetchList, fetchPv, createCrew, updateCrew } from '@/api/crew'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -174,10 +164,8 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
-        // page: 1,
-        // limit: 20,
-        pageNo: 1,
-        pageSize: 20,
+        page: 1,
+        limit: 20,
         importance: undefined,
         title: undefined,
         type: undefined,
@@ -274,7 +262,7 @@ export default {
         if (valid) {
           this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           this.temp.author = 'vue-element-admin'
-          createProp(this.temp).then(() => {
+          createCrew(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
@@ -301,7 +289,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateProp(tempData).then(() => {
+          updateCrew(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
