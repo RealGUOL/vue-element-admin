@@ -55,9 +55,9 @@
           <span>{{ row.price }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Prop Stock" width="150px" align="center">
+      <el-table-column label="Total Prop Stock" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.stock }}</span>
+          <span>{{ row.totalStock }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Image" width="150px" align="center">
@@ -219,6 +219,7 @@ export default {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
         this.list = response.data.items
+        this.computeTotalStock()
         this.total = response.data.total
         this.listLoading = false
       })
@@ -293,6 +294,15 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+    },
+    computeTotalStock() {
+      // console.log(this.list)
+      for (let i = 0; i < this.list.length; i++) {
+        this.list[i].totalStock = 0
+        for (let j = 0; j < this.list[i].depotProp.length; j++) {
+          this.list[i].totalStock += this.list[i].depotProp[j].stock
+        }
+      }
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
