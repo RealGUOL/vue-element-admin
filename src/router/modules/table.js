@@ -47,6 +47,12 @@ const tableRouter = {
       component: () => import('@/views/table/prop-complex-table'),
       name: 'PropTable',
       meta: { title: '道具' }
+    },
+    {
+      path: 'depot-table',
+      component: () => import('@/views/table/depot-complex-table'),
+      name: 'DepotTable',
+      meta: { title: '仓库' }
     }
   ]
 }
