@@ -29,7 +29,7 @@
       :key="tableKey"
       v-loading="listLoading"
       :data="list"
-      border
+      stripe
       fit
       highlight-current-row
       style="width: 100%;"
@@ -70,6 +70,14 @@
           <span>{{ row.remark }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="Depot Stock" width="200" align="center">
+        <template slot-scope="{row}">
+          <div v-for="(depot, index) in row.depotProp" :key="index">
+            <span>{{ depot.depotName }}: </span>
+            <el-input-number v-model="depot.stock" size="mini" controls-position="right" :min="0" :max="9999" label="库存数量" />
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="Add Time" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.createTime }}</span>
@@ -78,6 +86,22 @@
       <el-table-column label="Update Time" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.updateTime }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
+        <template slot-scope="{row,$index}">
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+            Edit
+          </el-button>
+          <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
+            Publish
+          </el-button>
+          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
+            Draft
+          </el-button>
+          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
+            Delete
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
