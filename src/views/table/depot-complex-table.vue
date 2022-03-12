@@ -277,10 +277,8 @@ export default {
           updateDepot(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.temp.updateTime = new Date()
-            // console.log(this.temp.updateTime)
             this.temp.createTime = this.list[index].createTime
             this.list.splice(index, 1, this.temp)
-            console.log(this.list[index].updateTime)
             this.dialogFormVisible = false
             this.$notify({
               title: 'Success',

@@ -35,12 +35,12 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Prop Code" width="150px" align="center">
+      <el-table-column label="Crew Code" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.crewId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Prop Name" width="150px" align="center">
+      <el-table-column label="Crew Name" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.crewName }}</span>
         </template>
@@ -60,14 +60,30 @@
           <span>{{ row.remark }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Add Time" width="150px" align="center">
+      <el-table-column label="Add Time" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.createTime }}</span>
+          <span>{{ row.createTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Update Time" width="150px" align="center">
+      <el-table-column label="Update Time" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.updateTime }}</span>
+          <span>{{ row.updateTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
+        <template slot-scope="{row,$index}">
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+            Edit
+          </el-button>
+          <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
+            Publish
+          </el-button>
+          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
+            Draft
+          </el-button>
+          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
+            Delete
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -75,28 +91,21 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="Crew ID" prop="crewId">
+          <el-input v-model="temp.crewId" :disabled="true" />
         </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
+        <el-form-item label="Crew Name" prop="crewName">
+          <el-input v-model="temp.crewName" />
         </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item label="Contact" prop="contact">
+          <el-input v-model="temp.contact" />
         </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
+        <el-form-item label="Phone" prop="phone">
+          <el-input v-model="temp.phone" />
         </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
-        </el-form-item>
-        <el-form-item label="Remark">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+        <el-form-item label="Remark" prop="remark">
+          <el-input v-model="temp.remark" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -177,13 +186,11 @@ export default {
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        crewId: undefined,
+        crewName: '',
+        contact: '',
+        phone: '',
+        remark: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -194,9 +201,16 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        crewName: [{ required: true, message: '剧组名称不能为空', trigger: 'change' }],
+        contact: [{ required: true, message: '联系人不能为空', trigger: 'change' }],
+        phone: [
+          { required: true, message: '请输入手机号码', trigger: 'blur' },
+          { min: 11, max: 11, message: '请输入11位手机号码', trigger: 'blur' },
+          {
+            pattern: /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/,
+            message: '请输入正确的手机号码'
+          }
+        ]
       },
       downloadLoading: false
     }
@@ -240,13 +254,11 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        crewId: undefined,
+        crewName: '',
+        contact: '',
+        phone: '',
+        remark: ''
       }
     },
     handleCreate() {
@@ -277,7 +289,8 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      delete (this.temp.createTime)
+      delete (this.temp.updateTime)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -288,9 +301,10 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateCrew(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
+            this.temp.updateTime = new Date()
+            this.temp.createTime = this.list[index].createTime
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
             this.$notify({
