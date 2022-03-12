@@ -50,14 +50,14 @@
           <span>{{ row.description }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Add Time" width="150px" align="center">
+      <el-table-column label="Add Time" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.createTime }}</span>
+          <span>{{ row.createTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Update Time" width="150px" align="center">
+      <el-table-column label="Update Time" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.updateTime }}</span>
+          <span>{{ row.updateTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
@@ -81,28 +81,15 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="Depot ID" prop="depotId">
+          <el-input v-model="temp.depotId" :disabled="true" />
         </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
+        <el-form-item label="Depot Name" prop="depotName">
+          <el-input v-model="temp.depotName" />
         </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
-        </el-form-item>
-        <el-form-item label="Remark">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+        <el-form-item label="Description" prop="description">
+          <el-input v-model="temp.description" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -183,13 +170,9 @@ export default {
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        depotId: undefined,
+        depotName: '',
+        description: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -246,13 +229,9 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        depotId: undefined,
+        depotName: '',
+        description: ''
       }
     },
     handleCreate() {
@@ -283,7 +262,8 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      delete (this.temp.createTime)
+      delete (this.temp.updateTime)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -294,10 +274,13 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateDepot(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
+            this.temp.updateTime = new Date()
+            // console.log(this.temp.updateTime)
+            this.temp.createTime = this.list[index].createTime
             this.list.splice(index, 1, this.temp)
+            console.log(this.list[index].updateTime)
             this.dialogFormVisible = false
             this.$notify({
               title: 'Success',
