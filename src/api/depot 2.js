@@ -39,11 +39,3 @@ export function updateDepot(data) {
     data
   })
 }
-
-export function deleteDepot(data) {
-  return request({
-    url: '/vue-element-admin/depot/delete',
-    method: 'post',
-    data
-  })
-}

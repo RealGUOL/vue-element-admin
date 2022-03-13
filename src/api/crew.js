@@ -39,3 +39,12 @@ export function updateCrew(data) {
     data
   })
 }
+
+export function deleteCrew(data) {
+  return request({
+    url: '/vue-element-admin/depot/delete',
+    method: 'post',
+    data
+  })
+}
+

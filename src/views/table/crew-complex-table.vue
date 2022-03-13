@@ -131,7 +131,7 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createCrew, updateCrew } from '@/api/crew'
+import { fetchList, fetchPv, createCrew, updateCrew, deleteCrew } from '@/api/crew'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -272,10 +272,8 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createCrew(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          createCrew(this.temp).then(response => {
+            this.list.unshift(response.data.item)
             this.dialogFormVisible = false
             this.$notify({
               title: 'Success',
@@ -318,13 +316,17 @@ export default {
       })
     },
     handleDelete(row, index) {
-      this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
-        type: 'success',
-        duration: 2000
+      this.listLoading = true
+      deleteCrew(this.list[index]).then(response => {
+        this.listLoading = false
+        this.$notify({
+          title: 'Success',
+          message: 'Delete Successfully',
+          type: 'success',
+          duration: 2000
+        })
+        this.list.splice(index, 1)
       })
-      this.list.splice(index, 1)
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {
