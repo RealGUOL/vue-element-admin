@@ -53,6 +53,12 @@ const tableRouter = {
       component: () => import('@/views/table/depot-complex-table'),
       name: 'DepotTable',
       meta: { title: '仓库' }
+    },
+    {
+      path: 'record-table',
+      component: () => import('@/views/table/record-complex-table'),
+      name: 'RecordTable',
+      meta: { title: '出借记录' }
     }
   ]
 }

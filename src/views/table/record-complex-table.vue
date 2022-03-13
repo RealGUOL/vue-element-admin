@@ -35,14 +35,14 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Prop ID" width="150px" align="center">
+      <el-table-column label="Record ID" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.propId }}</span>
+          <span>{{ row.lendingRecordId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Prop Code" width="150px" align="center">
+      <el-table-column label="Crew Name" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.propCode }}</span>
+          <span>{{ row.crewName }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Prop Name" width="150px" align="center">
@@ -50,19 +50,29 @@
           <span>{{ row.propName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Price" width="150px" align="center">
+      <el-table-column label="Depot Name" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.price }}</span>
+          <span>{{ row.depotName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Total Prop Stock" width="150px" align="center">
+      <el-table-column label="出借数量" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.totalStock }}</span>
+          <span>{{ row.borrowNum }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Image" width="150px" align="center">
+      <el-table-column label="日租金" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.img }}</span>
+          <span>{{ row.dailyRent }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="租期(天)" width="150px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.rentalDays }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="归还数量" width="150px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.return_num }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Remark" width="150px" align="center">
@@ -70,22 +80,19 @@
           <span>{{ row.remark }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="库存" width="200" align="center">
+      <el-table-column label="操作人" width="150px" align="center">
         <template slot-scope="{row}">
-          <div v-for="(depot, index) in row.depotProp" :key="index">
-            <span>{{ depot.depotName }}: </span>
-            <el-input-number v-model="depot.stock" size="mini" controls-position="right" :min="0" :max="9999" label="库存数量" />
-          </div>
+          <span>{{ row.operator }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Add Time" width="150px" align="center">
+      <el-table-column label="出借时间" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.createTime }}</span>
+          <span>{{ row.createTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Update Time" width="150px" align="center">
+      <el-table-column label="归还时间" width="160px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.updateTime }}</span>
+          <span>{{ row.returnTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
@@ -109,29 +116,40 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="Record ID" prop="lendingRecordId">
+          <el-input v-model="temp.lendingRecordId" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="Crew Name" prop="crewName">
+          <el-select v-model="temp.crewName" filterable remote placeholder="请输入关键词" :remote-method="remoteSearch" :loading="searchLoading">
+            <el-option v-for="item in tempList" :key="item.crewId" :label="item.crewName" :value="item.crewId" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
+        <el-form-item label="Prop Name" prop="propName">
+          <el-input v-model="temp.propName" />
         </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item label="Depot Name" prop="depotName">
+          <el-input v-model="temp.depotName" />
         </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
+        <el-form-item label="出借数量" prop="borrowNum">
+          <el-input-number v-model="temp.borrowNum" size="mini" controls-position="right" :min="0" :max="9999" label="出借数量" />
         </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
+        <el-form-item label="日租金" prop="dailyRent">
+          <el-input-number v-model="temp.dailyRent" :precision="2" size="mini" controls-position="right" :min="0" :max="9999" label="日租金" />
         </el-form-item>
-        <el-form-item label="Remark">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+        <el-form-item label="租期" prop="rentalDays">
+          <el-input-number v-model="temp.rentalDays" size="mini" controls-position="right" :min="0" :max="9999" label="租期" />
         </el-form-item>
+        <el-form-item label="归还数量" prop="returnNum">
+          <el-input-number v-model="temp.returnNum" size="mini" controls-position="right" :min="0" :max="9999" label="归还数量" />
+        </el-form-item>
+        <el-form-item label="归还时间" prop="returnTime">
+          <el-input v-model="temp.returnTime" />
+        </el-form-item>
+        <el-form-item label="Remark" prop="remark">
+          <el-input v-model="temp.remark" type="textarea" :rows="2" />
+        </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -156,7 +174,8 @@
 </template>
 
 <script>
-import { fetchList, fetchPv, createProp, updateProp } from '@/api/prop'
+import { fetchList, fetchPv, createRecord, updateRecord, deleteRecord } from '@/api/record'
+import { searchCrew } from '@/api/crew'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -175,7 +194,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 }, {})
 
 export default {
-  name: 'PropComplexTable',
+  name: 'RecordComplexTable',
   components: { Pagination },
   directives: { waves },
   filters: {
@@ -195,6 +214,10 @@ export default {
     return {
       tableKey: 0,
       list: null,
+      tempList: null,
+      search: {
+        keyword: undefined
+      },
       total: 0,
       listLoading: true,
       listQuery: {
@@ -211,13 +234,9 @@ export default {
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        depotId: undefined,
+        depotName: '',
+        description: ''
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -232,7 +251,8 @@ export default {
         timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
         title: [{ required: true, message: 'title is required', trigger: 'blur' }]
       },
-      downloadLoading: false
+      downloadLoading: false,
+      searchLoading: false
     }
   },
   created() {
@@ -243,7 +263,6 @@ export default {
       this.listLoading = true
       fetchList(this.listQuery).then(response => {
         this.list = response.data.items
-        this.computeTotalStock()
         this.total = response.data.total
         this.listLoading = false
       })
@@ -275,13 +294,9 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+        depotId: undefined,
+        depotName: '',
+        description: ''
       }
     },
     handleCreate() {
@@ -295,10 +310,8 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createProp(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          createRecord(this.temp).then(response => {
+            this.list.unshift(response.data.item)
             this.dialogFormVisible = false
             this.$notify({
               title: 'Success',
@@ -312,29 +325,22 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
+      delete (this.temp.createTime)
+      delete (this.temp.updateTime)
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    computeTotalStock() {
-      // console.log(this.list)
-      for (let i = 0; i < this.list.length; i++) {
-        this.list[i].totalStock = 0
-        for (let j = 0; j < this.list[i].depotProp.length; j++) {
-          this.list[i].totalStock += this.list[i].depotProp[j].stock
-        }
-      }
-    },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateProp(tempData).then(() => {
+          updateRecord(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
+            this.temp.updateTime = new Date()
+            this.temp.createTime = this.list[index].createTime
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
             this.$notify({
@@ -347,14 +353,31 @@ export default {
         }
       })
     },
+    remoteSearch(query) {
+      this.tempList = null
+      this.searchLoading = false
+      if (query !== '') {
+        this.searchLoading = true
+        this.search.keyword = query
+        searchCrew(this.search).then(response => {
+          this.searchLoading = false
+          this.tempList = response.data.items
+          console.log(this.tempList)
+        })
+      }
+    },
     handleDelete(row, index) {
-      this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
-        type: 'success',
-        duration: 2000
+      this.listLoading = true
+      deleteRecord(this.list[index]).then(response => {
+        this.listLoading = false
+        this.$notify({
+          title: 'Success',
+          message: 'Delete Successfully',
+          type: 'success',
+          duration: 2000
+        })
+        this.list.splice(index, 1)
       })
-      this.list.splice(index, 1)
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {

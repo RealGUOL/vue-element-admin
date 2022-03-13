@@ -35,7 +35,7 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Depot Id" width="150px" align="center">
+      <el-table-column label="Depot ID" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.depotId }}</span>
         </template>

@@ -42,7 +42,15 @@ export function updateCrew(data) {
 
 export function deleteCrew(data) {
   return request({
-    url: '/vue-element-admin/depot/delete',
+    url: '/vue-element-admin/crew/delete',
+    method: 'post',
+    data
+  })
+}
+
+export function searchCrew(data) {
+  return request({
+    url: '/vue-element-admin/crew/search',
     method: 'post',
     data
   })
