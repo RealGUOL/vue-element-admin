@@ -39,3 +39,11 @@ export function updateProp(data) {
     data
   })
 }
+
+export function searchProp(data) {
+  return request({
+    url: '/vue-element-admin/prop/search',
+    method: 'post',
+    data
+  })
+}

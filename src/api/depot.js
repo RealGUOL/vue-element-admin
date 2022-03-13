@@ -47,3 +47,11 @@ export function deleteDepot(data) {
     data
   })
 }
+
+export function searchDepot(data) {
+  return request({
+    url: '/vue-element-admin/depot/search',
+    method: 'post',
+    data
+  })
+}

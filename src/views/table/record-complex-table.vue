@@ -121,15 +121,19 @@
           <el-input v-model="temp.lendingRecordId" :disabled="true" />
         </el-form-item>
         <el-form-item label="Crew Name" prop="crewName">
-          <el-select v-model="temp.crewName" filterable remote placeholder="请输入关键词" :remote-method="remoteSearch" :loading="searchLoading">
+          <el-select v-model="temp.crewName" filterable remote placeholder="请输入关键词" :remote-method="remoteCrewSearch" :loading="searchLoading">
             <el-option v-for="item in tempList" :key="item.crewId" :label="item.crewName" :value="item.crewId" />
           </el-select>
         </el-form-item>
         <el-form-item label="Prop Name" prop="propName">
-          <el-input v-model="temp.propName" />
+          <el-select v-model="temp.propName" filterable remote placeholder="请输入关键词" :remote-method="remotePropSearch" :loading="searchLoading">
+            <el-option v-for="item in tempList" :key="item.propId" :label="item.propName" :value="item.propId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="Depot Name" prop="depotName">
-          <el-input v-model="temp.depotName" />
+          <el-select v-model="temp.depotName" filterable remote placeholder="请输入关键词" :remote-method="remoteDepotSearch" :loading="searchLoading">
+            <el-option v-for="item in tempList" :key="item.depotId" :label="item.depotName" :value="item.depotId" />
+          </el-select>
         </el-form-item>
         <el-form-item label="出借数量" prop="borrowNum">
           <el-input-number v-model="temp.borrowNum" size="mini" controls-position="right" :min="0" :max="9999" label="出借数量" />
@@ -176,6 +180,8 @@
 <script>
 import { fetchList, fetchPv, createRecord, updateRecord, deleteRecord } from '@/api/record'
 import { searchCrew } from '@/api/crew'
+import { searchProp } from '@/api/prop'
+import { searchDepot } from '@/api/depot'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -353,7 +359,7 @@ export default {
         }
       })
     },
-    remoteSearch(query) {
+    remoteCrewSearch(query) {
       this.tempList = null
       this.searchLoading = false
       if (query !== '') {
@@ -362,7 +368,30 @@ export default {
         searchCrew(this.search).then(response => {
           this.searchLoading = false
           this.tempList = response.data.items
-          console.log(this.tempList)
+        })
+      }
+    },
+    remotePropSearch(query) {
+      this.tempList = null
+      this.searchLoading = false
+      if (query !== '') {
+        this.searchLoading = true
+        this.search.keyword = query
+        searchProp(this.search).then(response => {
+          this.searchLoading = false
+          this.tempList = response.data.items
+        })
+      }
+    },
+    remoteDepotSearch(query) {
+      this.tempList = null
+      this.searchLoading = false
+      if (query !== '') {
+        this.searchLoading = true
+        this.search.keyword = query
+        searchDepot(this.search).then(response => {
+          this.searchLoading = false
+          this.tempList = response.data.items
         })
       }
     },
