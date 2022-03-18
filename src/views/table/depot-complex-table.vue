@@ -273,7 +273,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateDepot(tempData).then(() => {
-            const index = this.list.findIndex(v => v.id === this.temp.id)
+            const index = this.list.findIndex(v => v.depotId === this.temp.depotId)
             this.temp.updateTime = new Date()
             this.temp.createTime = this.list[index].createTime
             this.list.splice(index, 1, this.temp)

@@ -300,7 +300,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateCrew(tempData).then(() => {
-            const index = this.list.findIndex(v => v.id === this.temp.id)
+            const index = this.list.findIndex(v => v.crewId === this.temp.crewId)
             this.temp.updateTime = new Date()
             this.temp.createTime = this.list[index].createTime
             this.list.splice(index, 1, this.temp)
