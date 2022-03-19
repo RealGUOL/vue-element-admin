@@ -121,17 +121,17 @@
           <el-input v-model="temp.lendingRecordId" :disabled="true" />
         </el-form-item>
         <el-form-item label="Crew Name" prop="crewName">
-          <el-select v-model="temp.crewName" filterable remote placeholder="请输入关键词" :remote-method="remoteCrewSearch" :loading="searchLoading">
+          <el-select v-model="temp.crewId" filterable remote placeholder="请输入关键词" :remote-method="remoteCrewSearch" :loading="searchLoading">
             <el-option v-for="item in tempList" :key="item.crewId" :label="item.crewName" :value="item.crewId" />
           </el-select>
         </el-form-item>
         <el-form-item label="Prop Name" prop="propName">
-          <el-select v-model="temp.propName" filterable remote placeholder="请输入关键词" :remote-method="remotePropSearch" :loading="searchLoading">
+          <el-select v-model="temp.propId" filterable remote placeholder="请输入关键词" :remote-method="remotePropSearch" :loading="searchLoading">
             <el-option v-for="item in tempList" :key="item.propId" :label="item.propName" :value="item.propId" />
           </el-select>
         </el-form-item>
         <el-form-item label="Depot Name" prop="depotName">
-          <el-select v-model="temp.depotName" filterable remote placeholder="请输入关键词" :remote-method="remoteDepotSearch" :loading="searchLoading">
+          <el-select v-model="temp.depotId" filterable remote placeholder="请输入关键词" :remote-method="remoteDepotSearch" :loading="searchLoading">
             <el-option v-for="item in tempList" :key="item.depotId" :label="item.depotName" :value="item.depotId" />
           </el-select>
         </el-form-item>
