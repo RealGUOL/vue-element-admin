@@ -1,7 +1,9 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.crewName" placeholder="剧组名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.propName" placeholder="道具名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.depotName" placeholder="仓库名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
       </el-select>
@@ -72,7 +74,7 @@
       </el-table-column>
       <el-table-column label="归还数量" width="150px" align="center">
         <template slot-scope="{row}">
-          <span>{{ row.return_num }}</span>
+          <span>{{ row.returnNum }}</span>
         </template>
       </el-table-column>
       <el-table-column label="Remark" width="150px" align="center">
@@ -232,7 +234,9 @@ export default {
         page: 1,
         limit: 20,
         importance: undefined,
-        title: undefined,
+        crewName: undefined,
+        propName: undefined,
+        depotName: undefined,
         type: undefined,
         sort: '+id'
       },
