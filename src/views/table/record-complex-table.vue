@@ -122,17 +122,17 @@
         </el-form-item>
         <el-form-item label="Crew Name" prop="crewName">
           <el-select v-model="temp.crewId" filterable remote placeholder="请输入关键词" :remote-method="remoteCrewSearch" :loading="searchLoading">
-            <el-option v-for="item in tempList" :key="item.crewId" :label="item.crewName" :value="item.crewId" />
+            <el-option v-for="item in tempCrewList" :key="item.crewId" :label="item.crewName" :value="item.crewId" />
           </el-select>
         </el-form-item>
         <el-form-item label="Prop Name" prop="propName">
           <el-select v-model="temp.propId" filterable remote placeholder="请输入关键词" :remote-method="remotePropSearch" :loading="searchLoading">
-            <el-option v-for="item in tempList" :key="item.propId" :label="item.propName" :value="item.propId" />
+            <el-option v-for="item in tempPropList" :key="item.propId" :label="item.propName" :value="item.propId" />
           </el-select>
         </el-form-item>
         <el-form-item label="Depot Name" prop="depotName">
           <el-select v-model="temp.depotId" filterable remote placeholder="请输入关键词" :remote-method="remoteDepotSearch" :loading="searchLoading">
-            <el-option v-for="item in tempList" :key="item.depotId" :label="item.depotName" :value="item.depotId" />
+            <el-option v-for="item in tempDepotList" :key="item.depotId" :label="item.depotName" :value="item.depotId" />
           </el-select>
         </el-form-item>
         <el-form-item label="出借数量" prop="borrowNum">
@@ -148,7 +148,7 @@
           <el-input-number v-model="temp.returnNum" size="mini" controls-position="right" :min="0" :max="9999" label="归还数量" />
         </el-form-item>
         <el-form-item label="归还时间" prop="returnTime">
-          <el-input v-model="temp.returnTime" />
+          <el-date-picker v-model="temp.returnTime" type="datetime" placeholder="选择归还时间" />
         </el-form-item>
         <el-form-item label="Remark" prop="remark">
           <el-input v-model="temp.remark" type="textarea" :rows="2" />
@@ -220,7 +220,9 @@ export default {
     return {
       tableKey: 0,
       list: null,
-      tempList: null,
+      tempCrewList: null,
+      tempPropList: null,
+      tempDepotList: null,
       search: {
         keyword: undefined
       },
@@ -331,6 +333,15 @@ export default {
     },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
+      this.tempCrewList = [
+        { 'crewId': this.temp['crewId'], 'crewName': this.temp['crewName'] }
+      ]
+      this.tempPropList = [
+        { 'propId': this.temp['propId'], 'propName': this.temp['propName'] }
+      ]
+      this.tempDepotList = [
+        { 'depotId': this.temp['depotId'], 'depotName': this.temp['depotName'] }
+      ]
       delete (this.temp.createTime)
       delete (this.temp.updateTime)
       this.dialogStatus = 'update'
@@ -360,38 +371,35 @@ export default {
       })
     },
     remoteCrewSearch(query) {
-      this.tempList = null
       this.searchLoading = false
       if (query !== '') {
         this.searchLoading = true
         this.search.keyword = query
         searchCrew(this.search).then(response => {
           this.searchLoading = false
-          this.tempList = response.data.items
+          this.tempCrewList = response.data.items
         })
       }
     },
     remotePropSearch(query) {
-      this.tempList = null
       this.searchLoading = false
       if (query !== '') {
         this.searchLoading = true
         this.search.keyword = query
         searchProp(this.search).then(response => {
           this.searchLoading = false
-          this.tempList = response.data.items
+          this.tempPropList = response.data.items
         })
       }
     },
     remoteDepotSearch(query) {
-      this.tempList = null
       this.searchLoading = false
       if (query !== '') {
         this.searchLoading = true
         this.search.keyword = query
         searchDepot(this.search).then(response => {
           this.searchLoading = false
-          this.tempList = response.data.items
+          this.tempDepotList = response.data.items
         })
       }
     },
