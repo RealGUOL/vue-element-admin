@@ -1,28 +1,20 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
+      <el-input v-model="listQuery.crew_name" placeholder="剧组名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.contact" placeholder="联系人" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        Search
+        搜索
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        Add
+        新增
       </el-button>
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        Export
+        导出
       </el-button>
-      <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        reviewer
-      </el-checkbox>
     </div>
 
     <el-table
@@ -35,54 +27,45 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Crew ID" width="150px" align="center">
+      <el-table-column label="剧组ID" width="170px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.crewId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Crew Name" width="150px" align="center">
+      <el-table-column label="剧组名称" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.crewName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Contact" width="150px" align="center">
+      <el-table-column label="联系人" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.contact }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Phone" width="150px" align="center">
+      <el-table-column label="联系方式" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.phone }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Remark" width="150px" align="center">
+      <el-table-column label="备注" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.remark }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Add Time" width="160px" align="center">
+      <el-table-column label="添加时间" width="160px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.createTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Update Time" width="160px" align="center">
+      <el-table-column label="更新时间" width="160px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.updateTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
-        <template slot-scope="{row,$index}">
+      <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
+        <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
-          </el-button>
-          <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
-            Publish
-          </el-button>
-          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
-            Draft
-          </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
-            Delete
+            编辑
           </el-button>
         </template>
       </el-table-column>
@@ -92,28 +75,28 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Crew ID" prop="crewId">
+        <el-form-item label="剧组ID" prop="crewId">
           <el-input v-model="temp.crewId" :disabled="true" />
         </el-form-item>
-        <el-form-item label="Crew Name" prop="crewName">
+        <el-form-item label="剧组名称" prop="crewName">
           <el-input v-model="temp.crewName" />
         </el-form-item>
-        <el-form-item label="Contact" prop="contact">
+        <el-form-item label="联系人" prop="contact">
           <el-input v-model="temp.contact" />
         </el-form-item>
-        <el-form-item label="Phone" prop="phone">
+        <el-form-item label="联系方式" prop="phone">
           <el-input v-model="temp.phone" />
         </el-form-item>
-        <el-form-item label="Remark" prop="remark">
-          <el-input v-model="temp.remark" />
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="temp.remark" type="textarea" :rows="3" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
-          Cancel
+          取消
         </el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          Confirm
+          确认
         </el-button>
       </div>
     </el-dialog>
@@ -175,14 +158,13 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
+        crewName: undefined,
+        contact: undefined,
+        sort: 'crew_id:asc'
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
+      sortOptions: [{ label: '按ID升序', key: 'crew_id:asc' }, { label: '按ID降序', key: 'crew_id:dec' }],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
       temp: {
@@ -195,8 +177,8 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '编辑',
+        create: '新增'
       },
       dialogPvVisible: false,
       pvData: [],
@@ -337,13 +319,13 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
+        const tHeader = ['剧组ID', '剧组名称', '联系人', '联系方式', '备注', '添加时间', '更新时间']
+        const filterVal = ['crewId', 'crewName', 'contact', 'phone', 'remark', 'createTime', 'updateTime']
         const data = this.formatJson(filterVal)
         excel.export_json_to_excel({
           header: tHeader,
           data,
-          filename: 'table-list'
+          filename: '剧组信息'
         })
         this.downloadLoading = false
       })
