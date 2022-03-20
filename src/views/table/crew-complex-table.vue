@@ -332,7 +332,7 @@ export default {
     },
     formatJson(filterVal) {
       return this.list.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
+        if (j === 'createTime' || j === 'updateTime') {
           return parseTime(v[j])
         } else {
           return v[j]

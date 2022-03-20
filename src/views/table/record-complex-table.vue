@@ -4,26 +4,20 @@
       <el-input v-model="listQuery.crew_name" placeholder="剧组名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.prop_name" placeholder="道具名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
       <el-input v-model="listQuery.depot_name" placeholder="仓库名" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
-      </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
       <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
         <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
       </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        Search
+        搜索
       </el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        Add
+        新增
       </el-button>
       <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        Export
+        导出
       </el-button>
-      <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        reviewer
+      <el-checkbox v-model="showTotalRent" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
+        总租金
       </el-checkbox>
     </div>
 
@@ -37,22 +31,22 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Record ID" width="150px" align="center">
+      <el-table-column label="出借记录ID" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.lendingRecordId }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Crew Name" width="150px" align="center">
+      <el-table-column label="剧组名称" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.crewName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Prop Name" width="150px" align="center">
+      <el-table-column label="道具名称" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.propName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Depot Name" width="150px" align="center">
+      <el-table-column label="仓库名称" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.depotName }}</span>
         </template>
@@ -62,7 +56,7 @@
           <span>{{ row.borrowNum }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="日租金" width="150px" align="center">
+      <el-table-column label="日租金(元)" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.dailyRent }}</span>
         </template>
@@ -72,12 +66,17 @@
           <span>{{ row.rentalDays }}</span>
         </template>
       </el-table-column>
+      <el-table-column v-if="showTotalRent" label="总租金" width="110px" align="center">
+        <template slot-scope="{row}">
+          <span style="color:red;">{{ row.dailyRent * row.rentalDays }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="归还数量" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.returnNum }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Remark" width="150px" align="center">
+      <el-table-column label="备注" width="150px" align="center">
         <template slot-scope="{row}">
           <span>{{ row.remark }}</span>
         </template>
@@ -97,19 +96,10 @@
           <span>{{ row.returnTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
-        <template slot-scope="{row,$index}">
+      <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
+        <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
-            Edit
-          </el-button>
-          <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
-            Publish
-          </el-button>
-          <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
-            Draft
-          </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleDelete(row,$index)">
-            Delete
+            编辑
           </el-button>
         </template>
       </el-table-column>
@@ -119,20 +109,20 @@
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Record ID" prop="lendingRecordId">
+        <el-form-item label="出借记录ID" prop="lendingRecordId">
           <el-input v-model="temp.lendingRecordId" :disabled="true" />
         </el-form-item>
-        <el-form-item label="Crew Name" prop="crewName">
+        <el-form-item label="剧组名称" prop="crewName">
           <el-select v-model="temp.crewId" filterable remote placeholder="请输入关键词" :remote-method="remoteCrewSearch" :loading="searchLoading">
             <el-option v-for="item in tempCrewList" :key="item.crewId" :label="item.crewName" :value="item.crewId" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Prop Name" prop="propName">
+        <el-form-item label="道具名称" prop="propName">
           <el-select v-model="temp.propId" filterable remote placeholder="请输入关键词" :remote-method="remotePropSearch" :loading="searchLoading">
             <el-option v-for="item in tempPropList" :key="item.propId" :label="item.propName" :value="item.propId" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Depot Name" prop="depotName">
+        <el-form-item label="仓库名称" prop="depotName">
           <el-select v-model="temp.depotId" filterable remote placeholder="请输入关键词" :remote-method="remoteDepotSearch" :loading="searchLoading">
             <el-option v-for="item in tempDepotList" :key="item.depotId" :label="item.depotName" :value="item.depotId" />
           </el-select>
@@ -140,10 +130,10 @@
         <el-form-item label="出借数量" prop="borrowNum">
           <el-input-number v-model="temp.borrowNum" size="mini" controls-position="right" :min="0" :max="9999" label="出借数量" />
         </el-form-item>
-        <el-form-item label="日租金" prop="dailyRent">
+        <el-form-item label="日租金(元)" prop="dailyRent">
           <el-input-number v-model="temp.dailyRent" :precision="2" size="mini" controls-position="right" :min="0" :max="9999" label="日租金" />
         </el-form-item>
-        <el-form-item label="租期" prop="rentalDays">
+        <el-form-item label="租期(天)" prop="rentalDays">
           <el-input-number v-model="temp.rentalDays" size="mini" controls-position="right" :min="0" :max="9999" label="租期" />
         </el-form-item>
         <el-form-item label="归还数量" prop="returnNum">
@@ -152,17 +142,17 @@
         <el-form-item label="归还时间" prop="returnTime">
           <el-date-picker v-model="temp.returnTime" type="datetime" placeholder="选择归还时间" />
         </el-form-item>
-        <el-form-item label="Remark" prop="remark">
+        <el-form-item label="备注" prop="remark">
           <el-input v-model="temp.remark" type="textarea" :rows="2" />
         </el-form-item>
 
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
-          Cancel
+          取消
         </el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          Confirm
+          确认
         </el-button>
       </div>
     </el-dialog>
@@ -233,18 +223,16 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        importance: undefined,
         crew_name: undefined,
         prop_name: undefined,
         depot_name: undefined,
-        type: undefined,
-        sort: '+id'
+        sort: 'lending_record_id:asc'
       },
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
+      sortOptions: [{ label: '按ID升序', key: 'lending_record_id:asc' }, { label: '按ID降序', key: 'lending_record_id:dec' }],
       statusOptions: ['published', 'draft', 'deleted'],
-      showReviewer: false,
+      showTotalRent: false,
       temp: {
         depotId: undefined,
         depotName: '',
@@ -253,8 +241,8 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '编辑',
+        create: '新增'
       },
       dialogPvVisible: false,
       pvData: [],
@@ -429,20 +417,23 @@ export default {
     handleDownload() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
+        const tHeader = ['出借记录ID', '剧组名称', '道具名称', '仓库名称', '出借数量', '日租金', '租期(天)', '总租金', '归还数量', '备注', '操作人', '出借时间', '归还时间']
+        const filterVal = ['lendingRecordId', 'crewName', 'propName', 'depotName', 'borrowNum', 'dailyRent', 'rentalDays', 'totalRent', 'returnNum', 'remark', 'operator', 'createTime', 'returnTime']
         const data = this.formatJson(filterVal)
         excel.export_json_to_excel({
           header: tHeader,
           data,
-          filename: 'table-list'
+          filename: '出借记录'
         })
         this.downloadLoading = false
       })
     },
     formatJson(filterVal) {
+      this.list = this.list.map(v => {
+        return Object.assign({}, v, { 'totalRent': v.dailyRent * v.rentalDays })
+      })
       return this.list.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
+        if (j === 'creteTime' || j === 'updateTime' || j === 'returnTime') {
           return parseTime(v[j])
         } else {
           return v[j]
