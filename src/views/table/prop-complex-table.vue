@@ -122,28 +122,33 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
-          </el-select>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="图片" prop="img">
+          <el-avatar shape="square" size="large" :src="temp.img" />
         </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
+        <el-form-item label="道具ID" prop="propId">
+          <el-input v-model="temp.propId" :disabled="true" />
         </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
+        <el-form-item label="道具编码" prop="propCode">
+          <el-input v-model="temp.propCode" />
         </el-form-item>
-        <el-form-item label="Status">
-          <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-          </el-select>
+        <el-form-item label="道具名称" prop="propName">
+          <el-input v-model="temp.propName" />
         </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
+        <el-form-item label="单价(元)" prop="price">
+          <el-input-number v-model="temp.price" :precision="2" size="mini" controls-position="right" :min="0" :max="9999" label="单价(元)" />
         </el-form-item>
-        <el-form-item label="Remark">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+        <el-form-item label="库存详情" prop="timestamp">
+          <div v-for="(depot, index) in temp.depotProp" :key="index">
+            <span>{{ depot.depotName }}：</span>
+            <el-input-number v-model="depot.stock" size="mini" controls-position="right" :min="0" :max="9999" label="库存" @change="handleChange" />
+          </div>
+        </el-form-item>
+        <el-form-item label="总库存" prop="totalStock">
+          <span>{{ temp.totalStock }}个(件)</span>
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="temp.remark" type="textarea" :rows="3" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -358,7 +363,6 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateProp(tempData).then(() => {
             const index = this.list.findIndex(v => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
@@ -420,6 +424,12 @@ export default {
     getSortClass: function(key) {
       const sort = this.listQuery.sort
       return sort === `+${key}` ? 'ascending' : 'descending'
+    },
+    handleChange(value) {
+      this.temp.totalStock = 0
+      for (let j = 0; j < this.temp.depotProp.length; j++) {
+        this.temp.totalStock += this.temp.depotProp[j].stock
+      }
     }
   }
 }
